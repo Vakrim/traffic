@@ -1,5 +1,5 @@
 import { isKeyDown } from "../isKeyDown";
-import { Bodies, Composite, Body, Constraint, Vector } from "matter-js";
+import { Bodies, Body, Constraint, Vector } from "matter-js";
 import { projectVector } from "../projectVector";
 import { Actor } from "./Actor";
 import { World } from "../World";
@@ -12,7 +12,9 @@ const CAR_WIDTH = 1.74 * SCALE;
 const AXLE_INSET = 0.77 * SCALE;
 const WHEEL_RADIUS = 0.35 * SCALE;
 const WHEEL_WIDTH = 0.2 * SCALE;
-const WHEEL_FRICTION = 0.05;
+const FRONT_WHEEL_FRICTION = 0.05;
+const REAR_WHEEL_FRICTION = 0.02;
+const MAX_WHEEL_FRICTION_FORCE = 0.25;
 
 export class Car implements Actor {
   body: Body;
@@ -22,6 +24,7 @@ export class Car implements Actor {
   rearWheelConstraint: Constraint;
   steering: number = 0;
   throttle: number = 0;
+  maxThrust = 0.3;
 
   constructor(x: number, y: number, world: World) {
     this.body = Bodies.rectangle(x, y, CAR_LENGTH, CAR_WIDTH, {});
@@ -98,21 +101,21 @@ export class Car implements Actor {
     );
     Body.setAngle(this.rearWheel, this.body.angle);
 
-    this.applyWheelForce(this.frontWheel);
-    this.applyWheelForce(this.rearWheel);
+    this.applyWheelForce(this.frontWheel, FRONT_WHEEL_FRICTION);
+    this.applyWheelForce(this.rearWheel, REAR_WHEEL_FRICTION);
 
     const engine = Vector.mult(
       {
         x: Math.cos(this.body.angle),
         y: Math.sin(this.body.angle),
       },
-      this.throttle * 0.1
+      this.throttle * this.maxThrust
     );
 
     Body.applyForce(this.body, this.body.position, engine);
   }
 
-  private applyWheelForce(wheel: Body) {
+  private applyWheelForce(wheel: Body, friction: number) {
     const velocity = wheel.velocity;
 
     const normalDirection = {
@@ -121,9 +124,13 @@ export class Car implements Actor {
     };
 
     const force = projectVector(
-      Vector.mult(velocity, -WHEEL_FRICTION),
+      Vector.mult(velocity, -friction),
       normalDirection
     );
+
+    if (Vector.magnitude(force) > MAX_WHEEL_FRICTION_FORCE) {
+      Vector.mult(force, MAX_WHEEL_FRICTION_FORCE / Vector.magnitude(force));
+    }
 
     Body.applyForce(wheel, wheel.position, force);
   }

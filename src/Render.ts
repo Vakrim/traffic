@@ -1,4 +1,5 @@
 import { World } from "./World";
+import { renderDebug, renderLogs } from "./debugging";
 
 export class Render {
   WIDTH = 1200;
@@ -64,7 +65,11 @@ export class Render {
       actor.render(this.ctx);
     }
 
+    renderDebug(this.ctx);
+
     this.ctx.restore();
+
+    renderLogs(this.ctx);
   }
 }
 

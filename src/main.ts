@@ -5,10 +5,7 @@ import "./style.css";
 import {
   Engine,
   Render as DebugRender,
-  Runner,
-  Bodies,
-  Composite,
-  Common,
+  Runner
 } from "matter-js";
 import { Box } from "./actors/Box";
 
