@@ -1,5 +1,6 @@
 import { World } from "./World";
 import { renderDebug, renderLogs } from "./debugging";
+import { images } from "./loadImage";
 
 export class Render {
   WIDTH = 1200;
@@ -45,21 +46,44 @@ export class Render {
     this.zoom = this.CAMERA_EASE * zoom + (1 - this.CAMERA_EASE) * this.zoom;
   }
 
+  private getTransformMatrix() {
+    const d = new DOMMatrix([1, 0, 0, 1, 0, 0]);
+
+    d.scaleSelf(this.zoom, this.zoom);
+
+    d.translateSelf(
+      this.offset.x + (this.WIDTH / 2) * zoomNormalization(this.zoom),
+      this.offset.y + (this.HEIGHT / 2) * zoomNormalization(this.zoom)
+    );
+
+    return d;
+  }
+
   render() {
     this.ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     this.ctx.fillStyle = "#122";
     this.ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
 
-    this.ctx.fillStyle = "#fff";
-
     this.ctx.save();
 
-    this.ctx.scale(this.zoom, this.zoom);
+    const transform = this.getTransformMatrix();
 
-    this.ctx.translate(
-      this.offset.x + (this.WIDTH / 2) * zoomNormalization(this.zoom),
-      this.offset.y + (this.HEIGHT / 2) * zoomNormalization(this.zoom)
+    this.ctx.setTransform(transform);
+
+    const inverseTransform = transform.inverse();
+
+    const p = inverseTransform.transformPoint({ x: 0, y: 0 });
+
+    const pattern = this.ctx.createPattern(images.road, "repeat")!;
+    this.ctx.fillStyle = pattern;
+    this.ctx.fillRect(
+      p.x,
+      p.y,
+      this.WIDTH / this.zoom,
+      this.HEIGHT / this.zoom
     );
+
+    this.ctx.fillStyle = "#fff";
 
     for (const actor of this.world.actors) {
       actor.render(this.ctx);

@@ -3,7 +3,7 @@ import { Bodies, Body, Constraint, Vector } from "matter-js";
 import { projectVector } from "../projectVector";
 import { Actor } from "./Actor";
 import { World } from "../World";
-import carImageUrl from "../assets/car.png";
+import { images } from "../loadImage";
 
 const SCALE = 100;
 
@@ -143,7 +143,7 @@ export class Car implements Actor {
     ctx.rotate(this.body.angle);
 
     ctx.drawImage(
-      carImage,
+      images.car,
       -CAR_LENGTH / 2,
       -CAR_WIDTH / 2,
       CAR_LENGTH,
@@ -153,6 +153,3 @@ export class Car implements Actor {
     ctx.restore();
   }
 }
-
-const carImage = new Image();
-carImage.src = carImageUrl;

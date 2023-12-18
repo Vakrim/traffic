@@ -8,8 +8,10 @@ import {
   Runner
 } from "matter-js";
 import { Box } from "./actors/Box";
+import { waitForImages } from "./loadImage";
 
-function main() {
+async function main() {
+
   const engine = Engine.create({ gravity: { x: 0, y: 0 } });
 
   const debugRender = DebugRender.create({
@@ -35,6 +37,8 @@ function main() {
       (_x, i) => new Box(50 * 85, i * 85, 60, world)
     )
   );
+
+  await waitForImages();
 
   const render = new Render(world);
 
