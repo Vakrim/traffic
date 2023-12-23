@@ -1,11 +1,13 @@
+import { HashMap } from './HashMap';
 import { Point } from './Point';
+import { Segment, hashSegment } from './Segment';
 import { findShortesPath } from './findShortestPath';
 import { pointsToSegments } from './pointsToSegments';
 
 export class Grid {
   width: number;
   height: number;
-  cost = new Map<Point, number>();
+  cost = new HashMap<Segment, number>(hashSegment);
   cells: Point[][];
   paths: Point[][] = [];
 
@@ -15,7 +17,6 @@ export class Grid {
     this.cells = Array.from({ length: height }, (_, y) => {
       return Array.from({ length: width }, (_, x) => {
         const point = { x, y };
-        this.cost.set(point, 1);
         return point;
       });
     });
@@ -91,8 +92,14 @@ export class Grid {
 
     this.paths.push(path);
 
-    for (const cell of path) {
-      this.cost.set(cell, 0.5);
+    for (let i = 0; i < path.length - 1; i++) {
+      this.cost.set(
+        {
+          start: path[i],
+          end: path[i + 1],
+        },
+        0.5
+      );
     }
   }
 

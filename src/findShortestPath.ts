@@ -1,11 +1,7 @@
 import { Grid } from './grid';
 import { Point } from './Point';
 
-export function findShortesPath(
-  grid: Grid,
-  start: Point,
-  end: Point,
-) {
+export function findShortesPath(grid: Grid, start: Point, end: Point) {
   const openSet = [start];
   const closedSet = [];
   const cameFrom = new Map<Point, Point>();
@@ -29,7 +25,12 @@ export function findShortesPath(
 
       const isDiagonal = neighbor.x !== current.x && neighbor.y !== current.y;
       const score =
-        cellCost.get(current)! + grid.cost.get(neighbor)! * (isDiagonal ? 1.4 : 1);
+        cellCost.get(current)! +
+        (grid.cost.get({
+          start: current,
+          end: neighbor,
+        }) ?? 1) *
+          (isDiagonal ? 1.4 : 1);
 
       if (!openSet.includes(neighbor)) {
         openSet.push(neighbor);
