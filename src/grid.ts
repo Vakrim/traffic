@@ -1,6 +1,7 @@
 import { HashMap } from './HashMap';
 import { Point } from './Point';
 import { Segment, hashSegment } from './Segment';
+import { createEnvelope } from './createEnvelope';
 import { findShortesPath } from './findShortestPath';
 import { pointsToSegments } from './pointsToSegments';
 
@@ -56,30 +57,24 @@ export class Grid {
     ctx.lineWidth = 4;
 
     for (const path of this.paths) {
-      ctx.beginPath();
-      ctx.moveTo(
-        path[0].x * CELL_SIZE + PADDING,
-        path[0].y * CELL_SIZE + PADDING
-      );
-      for (const cell of path) {
-        ctx.lineTo(cell.x * CELL_SIZE + PADDING, cell.y * CELL_SIZE + PADDING);
-      }
-      ctx.stroke();
-
       const segments = pointsToSegments(path);
 
       for (const segment of segments) {
-        ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        const polygon = createEnvelope(segment, 0.5, 4);
+
+        ctx.fillStyle = `hsla(${Math.random() * 360}, 100%, 50%, 50%)`;
         ctx.beginPath();
         ctx.moveTo(
-          segment.start.x * CELL_SIZE + PADDING,
-          segment.start.y * CELL_SIZE + PADDING
+          polygon.points[0].x * CELL_SIZE + PADDING,
+          polygon.points[0].y * CELL_SIZE + PADDING
         );
-        ctx.lineTo(
-          segment.end.x * CELL_SIZE + PADDING,
-          segment.end.y * CELL_SIZE + PADDING
-        );
-        ctx.stroke();
+        for (const point of polygon.points) {
+          ctx.lineTo(
+            point.x * CELL_SIZE + PADDING,
+            point.y * CELL_SIZE + PADDING
+          );
+        }
+        ctx.fill();
       }
     }
   }
