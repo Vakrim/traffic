@@ -36,5 +36,5 @@ export function createEnvelope(
     points.push({ x, y });
   }
 
-  return { points };
+  return points;
 }

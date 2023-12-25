@@ -4,6 +4,7 @@ import { Segment, hashSegment } from './Segment';
 import { createEnvelope } from './createEnvelope';
 import { findShortesPath } from './findShortestPath';
 import { pointsToSegments } from './pointsToSegments';
+import * as Iter from './iter';
 
 export class Grid {
   width: number;
@@ -56,26 +57,27 @@ export class Grid {
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.lineWidth = 4;
 
-    for (const path of this.paths) {
-      const segments = pointsToSegments(path);
+    const segments = Iter.uniqBy(
+      Iter.flatMap(this.paths, pointsToSegments),
+      hashSegment
+    );
 
-      for (const segment of segments) {
-        const polygon = createEnvelope(segment, 0.5, 4);
+    for (const segment of segments) {
+      const polygon = createEnvelope(segment, 0.3, 4);
 
-        ctx.fillStyle = `hsla(${Math.random() * 360}, 100%, 50%, 50%)`;
-        ctx.beginPath();
-        ctx.moveTo(
-          polygon.points[0].x * CELL_SIZE + PADDING,
-          polygon.points[0].y * CELL_SIZE + PADDING
+      ctx.fillStyle = `hsla(${Math.random() * 360}, 100%, 50%, 50%)`;
+      ctx.beginPath();
+      ctx.moveTo(
+        polygon[0].x * CELL_SIZE + PADDING,
+        polygon[0].y * CELL_SIZE + PADDING
+      );
+      for (const point of polygon) {
+        ctx.lineTo(
+          point.x * CELL_SIZE + PADDING,
+          point.y * CELL_SIZE + PADDING
         );
-        for (const point of polygon.points) {
-          ctx.lineTo(
-            point.x * CELL_SIZE + PADDING,
-            point.y * CELL_SIZE + PADDING
-          );
-        }
-        ctx.fill();
       }
+      ctx.fill();
     }
   }
 
@@ -116,18 +118,35 @@ export class Grid {
 }
 
 function main() {
-  const grid = new Grid(50, 50);
+  const grid = new Grid(30, 30);
 
-  for (let angle = 0; angle < 2 * Math.PI; angle += 0.3) {
+  const RAYS = 6;
+  const START_OFFSET = Math.random() * 2 * Math.PI;
+
+  for (let i = 0; i < RAYS; i++) {
+    const angle = (i * 2 * Math.PI) / (RAYS - 1) + START_OFFSET;
+
     const circlePoint = grid.getCell(
-      Math.round(25 + Math.cos(angle) * 20),
-      Math.round(25 + Math.sin(angle) * 20)
+      Math.round(15 + Math.cos(angle) * 10),
+      Math.round(15 + Math.sin(angle) * 10)
     );
 
-    grid.generatePath(grid.getCell(25, 25), circlePoint);
+    grid.generatePath(grid.getCell(15, 15), circlePoint);
 
     grid.generatePath(circlePoint);
+    grid.generatePath(circlePoint);
+    grid.generatePath(circlePoint);
   }
+
+  grid.generatePath(grid.getCell(2, 2));
+  grid.generatePath(grid.getCell(27, 2));
+  grid.generatePath(grid.getCell(27, 27));
+  grid.generatePath(grid.getCell(2, 27));
+
+  grid.generatePath(grid.getCell(2, 2), grid.getCell(27, 2));
+  grid.generatePath(grid.getCell(27, 2), grid.getCell(27, 27));
+  grid.generatePath(grid.getCell(27, 27), grid.getCell(2, 27));
+  grid.generatePath(grid.getCell(2, 27), grid.getCell(2, 2));
 
   grid.draw();
 }

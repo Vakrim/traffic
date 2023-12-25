@@ -1,5 +1,3 @@
 import { Point } from './Point';
 
-export interface Polygon {
-  points: Point[];
-}
+export type Polygon = Point[];
