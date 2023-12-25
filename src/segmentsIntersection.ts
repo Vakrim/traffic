@@ -1,7 +1,7 @@
 import { Point } from './Point';
 import { Segment } from './Segment';
 
-export function segmentIntersection(
+export function segmentsIntersection(
   segmentA: Segment,
   segmentB: Segment
 ): Point | null {

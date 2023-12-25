@@ -117,7 +117,7 @@ export class Grid {
   }
 }
 
-function main() {
+function generateCityGrid() {
   const grid = new Grid(30, 30);
 
   const RAYS = 6;
@@ -147,6 +147,12 @@ function main() {
   grid.generatePath(grid.getCell(27, 2), grid.getCell(27, 27));
   grid.generatePath(grid.getCell(27, 27), grid.getCell(2, 27));
   grid.generatePath(grid.getCell(2, 27), grid.getCell(2, 2));
+
+  return grid;
+}
+
+function main() {
+  const grid = generateCityGrid();
 
   grid.draw();
 }
