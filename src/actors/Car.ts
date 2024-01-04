@@ -4,6 +4,7 @@ import { projectVector } from "../projectVector";
 import { Actor } from "./Actor";
 import { World } from "../World";
 import { images } from "../loadImage";
+import { debugVector, log } from "../debugging";
 
 const SCALE = 100;
 
@@ -12,8 +13,8 @@ const CAR_WIDTH = 1.74 * SCALE;
 const AXLE_INSET = 0.77 * SCALE;
 const WHEEL_RADIUS = 0.35 * SCALE;
 const WHEEL_WIDTH = 0.2 * SCALE;
-const FRONT_WHEEL_FRICTION = 0.05;
-const REAR_WHEEL_FRICTION = 0.02;
+const FRONT_WHEEL_FRICTION = 0.04;
+const REAR_WHEEL_FRICTION = 0.05;
 const MAX_WHEEL_FRICTION_FORCE = 0.25;
 
 export class Car implements Actor {
@@ -25,6 +26,7 @@ export class Car implements Actor {
   steering: number = 0;
   throttle: number = 0;
   maxThrust = 0.3;
+  previousVelocity: Vector = { x: 0, y: 0 };
 
   constructor(x: number, y: number, world: World) {
     this.body = Bodies.rectangle(x, y, CAR_LENGTH, CAR_WIDTH, {});
@@ -112,6 +114,33 @@ export class Car implements Actor {
       this.throttle * this.maxThrust
     );
 
+    const acceleration = Vector.mult(
+      Vector.sub(this.body.velocity, this.previousVelocity),
+      1 / dt
+    );
+
+    debugVector(Vector.mult(acceleration, 1000), this.body.position);
+
+    const accelerationAngle = angleBetween(
+      { x: Math.cos(this.body.angle), y: Math.sin(this.body.angle) },
+      acceleration
+    );
+
+    debugVector(
+      Vector.mult(
+        { x: Math.cos(this.body.angle), y: Math.sin(this.body.angle) },
+        1000
+      ),
+      this.body.position,
+      { strokeStyle: "green" }
+    );
+
+    log("accelerationAngle:");
+    log(accelerationAngle);
+
+    this.previousVelocity.x = this.body.velocity.x;
+    this.previousVelocity.y = this.body.velocity.y;
+
     Body.applyForce(this.body, this.body.position, engine);
   }
 
@@ -152,4 +181,14 @@ export class Car implements Actor {
 
     ctx.restore();
   }
+}
+
+function angleBetween(v1: Vector, v2: Vector) {
+  // Math.acos(dot(p1, p2) / (mag(p1) * mag(p2)));
+
+  const dot = v1.x * v2.x + v1.y * v2.y;
+  const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+  const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
+
+  return Math.acos(dot / (mag1 * mag2));
 }

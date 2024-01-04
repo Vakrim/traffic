@@ -1,3 +1,5 @@
+import { Vector } from "matter-js";
+
 const logs: string[] = [];
 const drawDebugs: ((ctx: CanvasRenderingContext2D) => void)[] = [];
 
@@ -31,4 +33,26 @@ export function renderDebug(ctx: CanvasRenderingContext2D) {
     draw(ctx);
   }
   drawDebugs.length = 0;
+}
+
+export function debugVector(
+  vector: Vector,
+  position: Vector,
+  { strokeStyle = "red", lineWidth = 4 } = {}
+) {
+  drawDebug((ctx) => {
+    ctx.save();
+
+    ctx.translate(position.x, position.y);
+
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(vector.x, vector.y);
+    ctx.stroke();
+
+    ctx.restore();
+  });
 }
